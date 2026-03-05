@@ -1,6 +1,5 @@
 const API_URL = '/api/auth';
 
-// Валидация
 function validateUsername(username) {
     const regex = /^[А-Яа-яЁё]+$/;
     if (!username) return 'Имя обязательно';
@@ -22,7 +21,6 @@ function validatePassword(password) {
     return '';
 }
 
-// Показать сообщение
 function showMessage(text, type) {
     const messageDiv = document.getElementById('message');
     if (!messageDiv) {
@@ -39,9 +37,7 @@ function showMessage(text, type) {
     }, 3000);
 }
 
-// Регистрация
 async function register() {
-    // Очищаем ошибки
     document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
     document.querySelectorAll('input').forEach(el => el.classList.remove('error'));
     
@@ -49,7 +45,6 @@ async function register() {
     const email = document.getElementById('reg-email')?.value;
     const password = document.getElementById('reg-password')?.value;
     
-    // Валидация
     const usernameError = validateUsername(username);
     const emailError = validateEmail(email);
     const passwordError = validatePassword(password);
@@ -93,7 +88,6 @@ async function register() {
     }
 }
 
-// Вход
 async function login() {
     console.log('Login function called');
     
@@ -134,9 +128,13 @@ async function login() {
         const data = await response.json();
         
         if (response.ok) {
+            localStorage.setItem('token', data.token); 
+            localStorage.setItem('user', JSON.stringify(data.user));
+
             showMessage('Вход выполнен успешно!', 'success');
+            
             setTimeout(() => {
-                window.location.href = '/';
+                window.location.href = '/'; 
             }, 1000);
         } else {
             showMessage(data.error || 'Ошибка входа', 'error');
@@ -146,7 +144,6 @@ async function login() {
     }
 }
 
-// Выход
 async function logout() {
     try {
         const response = await fetch(`${API_URL}/logout`, {
@@ -165,7 +162,6 @@ async function logout() {
     }
 }
 
-// Проверка авторизации
 async function checkAuth() {
     try {
         const response = await fetch(`${API_URL}/me`, {
@@ -173,22 +169,101 @@ async function checkAuth() {
             credentials: 'include'
         });
         
+        const authButtons = document.getElementById('auth-buttons');
+        const userMenu = document.getElementById('user-menu');
+        const userName = document.getElementById('user-name');
+
         if (response.ok) {
             const data = await response.json();
-            const authButtons = document.getElementById('auth-buttons');
-            const userMenu = document.getElementById('user-menu');
-            const userName = document.getElementById('user-name');
             
             if (authButtons) authButtons.style.display = 'none';
-            if (userMenu) {
-                userMenu.style.display = 'flex';
-                if (userName) userName.textContent = data.user.username;
+            if (userMenu) userMenu.style.display = 'flex';
+            
+            if (userName) {
+                userName.textContent = data.user.username;
+                userName.style.position = "absolute";
+                userName.style.left = "50%";
+                userName.style.transform = "translateX(-50%)";
             }
+
+            showPage('chat'); 
+
+        } else {
+            showPage('home');
+            if (authButtons) authButtons.style.display = 'flex';
+            if (userMenu) userMenu.style.display = 'none';
         }
     } catch (error) {
         console.log('Not authenticated');
+        showPage('home');
     }
 }
 
-// Запуск при загрузке
+async function checkAuth() {
+    console.log("Запуск проверки авторизации...");
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+    const authButtons = document.getElementById('auth-buttons');
+    const userMenu = document.getElementById('user-menu');
+    const userName = document.getElementById('user-name');
+
+    if (token && user) {
+        console.log("Пользователь найден, переключаю на чат");
+        
+        if (authButtons) authButtons.style.display = 'none';
+        if (userMenu) userMenu.style.display = 'flex';
+        if (userName) {
+            userName.textContent = user.username;
+            userName.style.position = "absolute";
+            userName.style.left = "50%";
+            userName.style.transform = "translateX(-50%)";
+            userName.style.fontWeight = "bold";
+        }
+
+        forceShowPage('chat');
+
+    } else {
+        console.log("Пользователь не в сети, показываю главную");
+        if (authButtons) authButtons.style.display = 'flex';
+        if (userMenu) userMenu.style.display = 'none';
+        forceShowPage('home');
+    }
+}
+
+function forceShowPage(pageName) {
+    const allPages = document.querySelectorAll('.page');
+    allPages.forEach(p => {
+        p.classList.remove('active');
+        p.style.display = 'none';
+    });
+
+    const target = document.getElementById(pageName + '-page');
+    if (target) {
+        target.classList.add('active');
+        target.style.display = 'block';
+        console.log("Страница " + pageName + " отображена");
+    } else {
+        console.error("Ошибка: Блок " + pageName + "-page не найден!");
+    }
+}
+
+function logout() {
+    localStorage.clear();
+    window.location.reload();
+}
+
+function showPage(pageName) {
+    document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none';
+        page.classList.remove('active');
+    });
+    
+    const target = document.getElementById(pageName + '-page');
+    if (target) {
+        target.style.display = 'block';
+        target.classList.add('active');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', checkAuth);

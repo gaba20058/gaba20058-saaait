@@ -5,40 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuthApp</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Дополнительные стили для переключения страниц */
-        .page {
-            display: none;
-        }
-        .page.active {
-            display: block;
-        }
-    </style>
 </head>
 <body>
-    <!-- Хедер (одинаковый для всех страниц) -->
     <header class="header">
         <div class="header-container">
             <div class="logo" onclick="showPage('home')" style="cursor: pointer;">
                 <h1>Auth<span>App</span></h1>
             </div>
             
-            <!-- Кнопки для неавторизованных -->
+            <span class="user-name" id="user-name"></span>
+
             <div class="auth-buttons" id="auth-buttons">
                 <button class="btn btn-outline" onclick="showPage('login')">Вход</button>
                 <button class="btn btn-primary" onclick="showPage('register')">Регистрация</button>
             </div>
-            
-            <!-- Меню авторизованного пользователя -->
+
             <div class="user-menu" id="user-menu" style="display: none;">
-                <span class="user-name" id="user-name"></span>
                 <button class="btn btn-outline" onclick="logout()">Выход</button>
             </div>
         </div>
     </header>
 
-    <!-- Главная страница -->
-    <div id="home-page" class="page active">
+    <div id="home-page" class="page">
         <main class="main-content">
             <div class="container">
                 <div class="hero">
@@ -71,144 +59,79 @@
         </main>
     </div>
 
-    <!-- Страница регистрации -->
     <div id="register-page" class="page">
         <main class="main-content">
             <div class="container">
                 <div class="form-container">
                     <h2>Регистрация</h2>
-                    
                     <form id="registerForm" onsubmit="event.preventDefault(); register()">
                         <div class="form-group">
                             <label for="reg-username">Имя пользователя</label>
-                            <input 
-                                type="text" 
-                                id="reg-username" 
-                                placeholder="Введите имя (только русские буквы)" 
-                                required 
-                                pattern="^[А-Яа-яЁё]+$"
-                                title="Только кириллица"
-                            >
-                            <div class="error-message" id="username-error"></div>
+                            <input type="text" id="reg-username" placeholder="Только русские буквы" required pattern="^[А-Яа-яЁё]+$">
                         </div>
-
                         <div class="form-group">
                             <label for="reg-email">Email</label>
-                            <input 
-                                type="email" 
-                                id="reg-email" 
-                                placeholder="Введите email" 
-                                required
-                            >
-                            <div class="error-message" id="email-error"></div>
+                            <input type="email" id="reg-email" required>
                         </div>
-
                         <div class="form-group">
                             <label for="reg-password">Пароль</label>
-                            <input 
-                                type="password" 
-                                id="reg-password" 
-                                placeholder="Минимум 6 символов" 
-                                required
-                                minlength="6"
-                            >
-                            <div class="error-message" id="password-error"></div>
+                            <input type="password" id="reg-password" minlength="6" required>
                         </div>
-
                         <button type="submit" class="btn btn-primary btn-block">Зарегистрироваться</button>
                     </form>
-
-                    <p class="form-footer">
-                        Уже есть аккаунт? 
-                        <button class="link-button" onclick="showPage('login')">Войти</button>
-                    </p>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Страница входа -->
     <div id="login-page" class="page">
         <main class="main-content">
             <div class="container">
                 <div class="form-container">
-                    <h2>Вход в аккаунт</h2>
-                    
+                    <h2>Вход</h2>
                     <form id="loginForm" onsubmit="event.preventDefault(); login()">
                         <div class="form-group">
                             <label for="login-email">Email</label>
-                            <input 
-                                type="email" 
-                                id="login-email" 
-                                placeholder="Введите email" 
-                                required
-                            >
-                            <div class="error-message" id="login-email-error"></div>
+                            <input type="email" id="login-email" required>
                         </div>
-
                         <div class="form-group">
                             <label for="login-password">Пароль</label>
-                            <input 
-                                type="password" 
-                                id="login-password" 
-                                placeholder="Введите пароль" 
-                                required
-                            >
-                            <div class="error-message" id="login-password-error"></div>
+                            <input type="password" id="login-password" required>
                         </div>
-
                         <button type="submit" class="btn btn-primary btn-block">Войти</button>
                     </form>
-
-                    <p class="form-footer">
-                        Нет аккаунта? 
-                        <button class="link-button" onclick="showPage('register')">Зарегистрироваться</button>
-                    </p>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Сообщения -->
+    <div id="chat-page" class="page">
+        <main class="main-content">
+            <div class="container chat-layout">
+                <div class="chat-sidebar">
+                    <div class="chat-search"><input type="text" placeholder="Поиск..."></div>
+                    <div class="chat-list">
+                        <div class="chat-item active">
+                            <div class="chat-info"><h4>Общий чат</h4><p>Активен</p></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-window">
+                    <div class="chat-header"><h3>Общий чат</h3></div>
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message-item received">Привет! Это страница чата.</div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Сообщение...">
+                        <button class="btn btn-primary" onclick="sendMessage()">Отправить</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
     <div id="message" class="message"></div>
 
     <script src="main.js"></script>
-    <script>
-        // Функция переключения страниц
-        function showPage(pageName) {
-            // Скрываем все страницы
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
-            
-            // Показываем нужную страницу
-            document.getElementById(pageName + '-page').classList.add('active');
-            
-            // Обновляем активную кнопку в хедере
-            updateHeaderButtons(pageName);
-        }
-
-        // Обновление кнопок в хедере
-        function updateHeaderButtons(activePage) {
-            const loginBtn = document.querySelector('.auth-buttons .btn-outline');
-            const registerBtn = document.querySelector('.auth-buttons .btn-primary');
-            
-            if (activePage === 'login') {
-                loginBtn.className = 'btn btn-primary';
-                registerBtn.className = 'btn btn-outline';
-            } else if (activePage === 'register') {
-                loginBtn.className = 'btn btn-outline';
-                registerBtn.className = 'btn btn-primary';
-            } else {
-                loginBtn.className = 'btn btn-outline';
-                registerBtn.className = 'btn btn-primary';
-            }
-        }
-
-        // Показываем главную страницу при загрузке
-        document.addEventListener('DOMContentLoaded', function() {
-            showPage('home');
-        });
-    </script>
 </body>
 </html>

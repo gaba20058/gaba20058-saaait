@@ -145,6 +145,7 @@ router.post(
 
 router.get(
   "/me", 
+  authenticateToken,
   async function (req, res) {
   try {
     const user=await prisma.user.findUnique({
