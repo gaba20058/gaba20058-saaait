@@ -23,23 +23,18 @@ function validatePassword(password) {
 
 function showMessage(text, type) {
     const messageDiv = document.getElementById('message');
-    if (!messageDiv) {
-        console.error('Message div not found');
-        return;
-    }
+    if (!messageDiv) return;
     messageDiv.textContent = text;
     messageDiv.className = `message ${type}`;
     messageDiv.style.display = 'block';
-    console.log(`Message: ${text} (${type})`);
     
     setTimeout(() => {
         messageDiv.style.display = 'none';
     }, 3000);
 }
 
-async function register() {
-    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-    document.querySelectorAll('input').forEach(el => el.classList.remove('error'));
+async function register(event) {
+    event.preventDefault();
     
     const username = document.getElementById('reg-username')?.value;
     const email = document.getElementById('reg-email')?.value;
@@ -50,18 +45,7 @@ async function register() {
     const passwordError = validatePassword(password);
     
     if (usernameError || emailError || passwordError) {
-        if (usernameError) {
-            document.getElementById('username-error').textContent = usernameError;
-            document.getElementById('reg-username').classList.add('error');
-        }
-        if (emailError) {
-            document.getElementById('email-error').textContent = emailError;
-            document.getElementById('reg-email').classList.add('error');
-        }
-        if (passwordError) {
-            document.getElementById('password-error').textContent = passwordError;
-            document.getElementById('reg-password').classList.add('error');
-        }
+        showMessage(usernameError || emailError || passwordError, 'error');
         return;
     }
     
@@ -78,7 +62,7 @@ async function register() {
         if (response.ok) {
             showMessage('Регистрация успешна!', 'success');
             setTimeout(() => {
-                window.location.href = 'login.html';
+                showPage('login');
             }, 2000);
         } else {
             showMessage(data.error || 'Ошибка регистрации', 'error');
@@ -88,11 +72,8 @@ async function register() {
     }
 }
 
-async function login() {
-    console.log('Login function called');
-    
-    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-    document.querySelectorAll('input').forEach(el => el.classList.remove('error'));
+async function login(event) {
+    event.preventDefault();
     
     const email = document.getElementById('login-email')?.value;
     const password = document.getElementById('login-password')?.value;
@@ -106,14 +87,7 @@ async function login() {
     const passwordError = validatePassword(password);
     
     if (emailError || passwordError) {
-        if (emailError) {
-            document.getElementById('login-email-error').textContent = emailError;
-            document.getElementById('login-email').classList.add('error');
-        }
-        if (passwordError) {
-            document.getElementById('login-password-error').textContent = passwordError;
-            document.getElementById('login-password').classList.add('error');
-        }
+        showMessage(emailError || passwordError, 'error');
         return;
     }
     
@@ -134,7 +108,8 @@ async function login() {
             showMessage('Вход выполнен успешно!', 'success');
             
             setTimeout(() => {
-                window.location.href = '/'; 
+                checkAuth();
+                showPage('chat');
             }, 1000);
         } else {
             showMessage(data.error || 'Ошибка входа', 'error');
@@ -144,126 +119,100 @@ async function login() {
     }
 }
 
-async function logout() {
-    try {
-        const response = await fetch(`${API_URL}/logout`, {
-            method: 'POST',
-            credentials: 'include'
-        });
-        
-        if (response.ok) {
-            showMessage('Выход выполнен успешно', 'success');
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 1000);
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    checkAuth();
+    showPage('home');
+    showMessage('Выход выполнен успешно', 'success');
+}
+
+function showPage(pageName) {
+    console.log('Переход на страницу:', pageName);
+    
+    document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+    });
+    
+    const target = document.getElementById(pageName + '-page');
+    if (target) {
+        target.classList.add('active');
+        console.log('Страница найдена:', pageName + '-page');
+    } else {
+        console.error('Страница не найдена:', pageName + '-page');
+        const altTarget = document.getElementById(pageName);
+        if (altTarget) {
+            altTarget.classList.add('active');
+            console.log('Найдена альтернативная страница:', pageName);
         }
-    } catch (error) {
-        showMessage('Ошибка при выходе', 'error');
     }
 }
 
-async function checkAuth() {
-    try {
-        const response = await fetch(`${API_URL}/me`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        
-        const authButtons = document.getElementById('auth-buttons');
-        const userMenu = document.getElementById('user-menu');
-        const userName = document.getElementById('user-name');
-
-        if (response.ok) {
-            const data = await response.json();
-            
-            if (authButtons) authButtons.style.display = 'none';
-            if (userMenu) userMenu.style.display = 'flex';
-            
-            if (userName) {
-                userName.textContent = data.user.username;
-                userName.style.position = "absolute";
-                userName.style.left = "50%";
-                userName.style.transform = "translateX(-50%)";
-            }
-
-            showPage('chat'); 
-
-        } else {
-            showPage('home');
-            if (authButtons) authButtons.style.display = 'flex';
-            if (userMenu) userMenu.style.display = 'none';
-        }
-    } catch (error) {
-        console.log('Not authenticated');
-        showPage('home');
+function sendMessage() {
+    const input = document.getElementById('chat-input');
+    if (input.value.trim()) {
+        const messages = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message-item sent';
+        messageDiv.textContent = input.value;
+        messages.appendChild(messageDiv);
+        input.value = '';
+        messages.scrollTop = messages.scrollHeight;
     }
 }
 
-async function checkAuth() {
-    console.log("Запуск проверки авторизации...");
+function checkAuth() {
+    console.log('Проверка авторизации...');
+    
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || 'null');
 
     const authButtons = document.getElementById('auth-buttons');
     const userMenu = document.getElementById('user-menu');
     const userName = document.getElementById('user-name');
+    const navButtons = document.getElementById('nav-buttons');
+
+    if (!authButtons || !userMenu || !userName || !navButtons) {
+        console.error('Не найдены элементы интерфейса');
+        return;
+    }
 
     if (token && user) {
-        console.log("Пользователь найден, переключаю на чат");
+        console.log('Пользователь авторизован:', user.username);
         
-        if (authButtons) authButtons.style.display = 'none';
-        if (userMenu) userMenu.style.display = 'flex';
-        if (userName) {
-            userName.textContent = user.username;
-            userName.style.position = "absolute";
-            userName.style.left = "50%";
-            userName.style.transform = "translateX(-50%)";
-            userName.style.fontWeight = "bold";
-        }
-
-        forceShowPage('chat');
-
+        authButtons.style.display = 'none';
+        userMenu.style.display = 'flex';
+        navButtons.classList.add('active');
+        userName.textContent = user.username;
     } else {
-        console.log("Пользователь не в сети, показываю главную");
-        if (authButtons) authButtons.style.display = 'flex';
-        if (userMenu) userMenu.style.display = 'none';
-        forceShowPage('home');
+        console.log('Пользователь не авторизован');
+        
+        authButtons.style.display = 'flex';
+        userMenu.style.display = 'none';
+        navButtons.classList.remove('active');
+        userName.textContent = '';
     }
 }
 
-function forceShowPage(pageName) {
-    const allPages = document.querySelectorAll('.page');
-    allPages.forEach(p => {
-        p.classList.remove('active');
-        p.style.display = 'none';
-    });
+window.showPage = showPage;
+window.logout = logout;
+window.sendMessage = sendMessage;
+window.register = register;
+window.login = login;
 
-    const target = document.getElementById(pageName + '-page');
-    if (target) {
-        target.classList.add('active');
-        target.style.display = 'block';
-        console.log("Страница " + pageName + " отображена");
-    } else {
-        console.error("Ошибка: Блок " + pageName + "-page не найден!");
-    }
-}
-
-function logout() {
-    localStorage.clear();
-    window.location.reload();
-}
-
-function showPage(pageName) {
-    document.querySelectorAll('.page').forEach(page => {
-        page.style.display = 'none';
-        page.classList.remove('active');
-    });
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM загружен');
     
-    const target = document.getElementById(pageName + '-page');
-    if (target) {
-        target.style.display = 'block';
-        target.classList.add('active');
+    const registerForm = document.getElementById('registerForm');
+    const loginForm = document.getElementById('loginForm');
+    
+    if (registerForm) {
+        registerForm.addEventListener('submit', register);
     }
-}
-
-document.addEventListener('DOMContentLoaded', checkAuth);
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', login);
+    }
+    
+    checkAuth();
+});

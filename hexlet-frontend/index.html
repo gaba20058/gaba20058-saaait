@@ -3,34 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuthApp</title>
+    <title>АндрейГрам</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header class="header">
-        <div class="header-container">
-            <div class="logo" onclick="showPage('home')" style="cursor: pointer;">
-                <h1>Auth<span>App</span></h1>
-            </div>
-            
-            <span class="user-name" id="user-name"></span>
+    <div class="header-container">
+        <div class="logo" onclick="showPage('home')">
+            <h1>Андрей<span>Грам</span></h1>
+        </div>
+        
+        <div class="nav-buttons" id="nav-buttons">
+            <button class="btn btn-outline" onclick="showPage('chat')">Чаты</button>
+            <button class="btn btn-outline" onclick="showPage('posts')">Посты</button>
+        </div>
 
+        <div class="user-section">
+            <span class="user-name" id="user-name"></span>
+            
             <div class="auth-buttons" id="auth-buttons">
                 <button class="btn btn-outline" onclick="showPage('login')">Вход</button>
                 <button class="btn btn-primary" onclick="showPage('register')">Регистрация</button>
             </div>
 
-            <div class="user-menu" id="user-menu" style="display: none;">
+            <div class="user-menu" id="user-menu">
                 <button class="btn btn-outline" onclick="logout()">Выход</button>
             </div>
         </div>
-    </header>
+    </div>
+</header>
 
-    <div id="home-page" class="page">
+    <div id="home-page" class="page active">
         <main class="main-content">
             <div class="container">
                 <div class="hero">
-                    <h1>Добро пожаловать в AuthApp</h1>
+                    <h1>Добро пожаловать в АндрейГрам</h1>
                     <p>Простая и безопасная аутентификация для ваших проектов</p>
                     <div class="hero-buttons">
                         <button class="btn btn-primary btn-large" onclick="showPage('register')">Начать сейчас</button>
@@ -47,7 +54,7 @@
                     <div class="feature-card">
                         <div class="feature-icon">⚡</div>
                         <h3>Быстрота</h3>
-                        <p>Мгновенная аутентификация</p>
+                        <p>Мгновенная передача сообщений</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">📱</div>
@@ -64,10 +71,10 @@
             <div class="container">
                 <div class="form-container">
                     <h2>Регистрация</h2>
-                    <form id="registerForm" onsubmit="event.preventDefault(); register()">
+                    <form id="registerForm">
                         <div class="form-group">
                             <label for="reg-username">Имя пользователя</label>
-                            <input type="text" id="reg-username" placeholder="Только русские буквы" required pattern="^[А-Яа-яЁё]+$">
+                            <input type="text" id="reg-username" placeholder="Только русские буквы" required>
                         </div>
                         <div class="form-group">
                             <label for="reg-email">Email</label>
@@ -89,7 +96,7 @@
             <div class="container">
                 <div class="form-container">
                     <h2>Вход</h2>
-                    <form id="loginForm" onsubmit="event.preventDefault(); login()">
+                    <form id="loginForm">
                         <div class="form-group">
                             <label for="login-email">Email</label>
                             <input type="email" id="login-email" required>
@@ -109,21 +116,44 @@
         <main class="main-content">
             <div class="container chat-layout">
                 <div class="chat-sidebar">
-                    <div class="chat-search"><input type="text" placeholder="Поиск..."></div>
+                    <div class="chat-search">
+                        <input type="text" placeholder="Поиск...">
+                    </div>
                     <div class="chat-list">
                         <div class="chat-item active">
-                            <div class="chat-info"><h4>Общий чат</h4><p>Активен</p></div>
+                            <div class="chat-info">
+                                <h4>Общий чат</h4>
+                                <p>Активен</p>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="chat-window">
-                    <div class="chat-header"><h3>Общий чат</h3></div>
+                    <div class="chat-header">
+                        <h3>Общий чат</h3>
+                    </div>
                     <div class="chat-messages" id="chat-messages">
                         <div class="message-item received">Привет! Это страница чата.</div>
                     </div>
                     <div class="chat-input-area">
                         <input type="text" id="chat-input" placeholder="Сообщение...">
                         <button class="btn btn-primary" onclick="sendMessage()">Отправить</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="posts-page" class="page">
+        <main class="main-content">
+            <div class="container">
+                <div class="posts-container">
+                    <div class="posts-header">
+                        <h2>Посты</h2>
+                        <button class="btn btn-primary">Создать пост</button>
+                    </div>
+                    <div class="posts-list">
+                        <p>Здесь пока нет постов. Создайте первый пост!</p>
                     </div>
                 </div>
             </div>
