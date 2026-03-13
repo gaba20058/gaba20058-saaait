@@ -8,30 +8,30 @@
 </head>
 <body>
     <header class="header">
-    <div class="header-container">
-        <div class="logo" onclick="showPage('home')">
-            <h1>Андрей<span>Грам</span></h1>
-        </div>
-        
-        <div class="nav-buttons" id="nav-buttons">
-            <button class="btn btn-outline" onclick="showPage('chat')">Чаты</button>
-            <button class="btn btn-outline" onclick="showPage('posts')">Посты</button>
-        </div>
-
-        <div class="user-section">
-            <span class="user-name" id="user-name"></span>
+        <div class="header-container">
+            <div class="logo" onclick="showPage('home')">
+                <h1>Андрей<span>Грам</span></h1>
+            </div>
             
-            <div class="auth-buttons" id="auth-buttons">
-                <button class="btn btn-outline" onclick="showPage('login')">Вход</button>
-                <button class="btn btn-primary" onclick="showPage('register')">Регистрация</button>
+            <div class="nav-buttons" id="nav-buttons">
+                <button class="btn btn-outline" onclick="showPage('chat')">Чаты</button>
+                <button class="btn btn-outline" onclick="showPage('posts')">Посты</button>
             </div>
 
-            <div class="user-menu" id="user-menu">
-                <button class="btn btn-outline" onclick="logout()">Выход</button>
+            <div class="user-section">
+                <span class="user-name" id="user-name"></span>
+                
+                <div class="auth-buttons" id="auth-buttons">
+                    <button class="btn btn-outline" onclick="showPage('login')">Вход</button>
+                    <button class="btn btn-primary" onclick="showPage('register')">Регистрация</button>
+                </div>
+
+                <div class="user-menu" id="user-menu">
+                    <button class="btn btn-outline" onclick="logout()">Выход</button>
+                </div>
             </div>
         </div>
-    </div>
-</header>
+    </header>
 
     <div id="home-page" class="page active">
         <main class="main-content">
@@ -39,7 +39,7 @@
                 <div class="hero">
                     <h1>Добро пожаловать в АндрейГрам</h1>
                     <p>Простая и безопасная аутентификация для ваших проектов</p>
-                    <div class="hero-buttons">
+                    <div class="hero-buttons" id="hero-buttons">
                         <button class="btn btn-primary btn-large" onclick="showPage('register')">Начать сейчас</button>
                         <button class="btn btn-outline btn-large" onclick="showPage('login')">Войти</button>
                     </div>
@@ -117,26 +117,31 @@
             <div class="container chat-layout">
                 <div class="chat-sidebar">
                     <div class="chat-search">
-                        <input type="text" placeholder="Поиск...">
+                        <input type="text" id="chatSearch" placeholder="Поиск чатов..." oninput="filterChats()">
                     </div>
-                    <div class="chat-list">
-                        <div class="chat-item active">
+                    
+                    <div class="create-chat-btn" onclick="openChatModal()">
+                        <span class="plus-icon">+</span> Создать чат
+                    </div>
+                    
+                    <div class="chat-list" id="chatList">
+                        <div class="chat-item">
                             <div class="chat-info">
-                                <h4>Общий чат</h4>
-                                <p>Активен</p>
+                                <h4>Загрузка чатов...</h4>
                             </div>
                         </div>
                     </div>
                 </div>
+                
                 <div class="chat-window">
-                    <div class="chat-header">
-                        <h3>Общий чат</h3>
+                    <div class="chat-header" id="chatHeader">
+                        <h3>Выберите чат</h3>
                     </div>
-                    <div class="chat-messages" id="chat-messages">
-                        <div class="message-item received">Привет! Это страница чата.</div>
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Сообщения будут здесь -->
                     </div>
-                    <div class="chat-input-area">
-                        <input type="text" id="chat-input" placeholder="Сообщение...">
+                    <div class="chat-input-area" id="chatInputArea" style="display: none;">
+                        <input type="text" id="messageInput" placeholder="Введите сообщение...">
                         <button class="btn btn-primary" onclick="sendMessage()">Отправить</button>
                     </div>
                 </div>
@@ -158,6 +163,32 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <div class="modal-overlay" id="chatModal" style="display: none;" onclick="closeChatModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Создать новый чат</h3>
+                <button class="modal-close" onclick="closeChatModal()">✕</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="chatName">Название чата</label>
+                    <input type="text" id="chatName" placeholder="Введите название чата">
+                </div>
+                
+                <div class="form-group">
+                    <label>Участники</label>
+                    <input type="text" class="user-search" id="userSearch" placeholder="Поиск пользователей..." oninput="filterUsers()">
+                    <div class="users-list" id="usersList">
+                        <div class="loading-users">Загрузка пользователей...</div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary btn-block" onclick="createChat()">Создать чат</button>
+            </div>
+        </div>
     </div>
 
     <div id="message" class="message"></div>

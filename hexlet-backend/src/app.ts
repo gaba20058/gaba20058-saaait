@@ -2,6 +2,8 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import authRouter from './api/auth';
+import chatRouter from './api/chat';
+import usersRouter from './api/users';
 
 const app = express();
 
@@ -10,13 +12,19 @@ app.use(cookieParser());
 
 app.use(express.static(path.join(__dirname, '../../hexlet-frontend')));
 
+console.log('authRouter:', typeof authRouter);
+console.log('chatRouter:', typeof chatRouter);
+console.log('usersRouter:', typeof usersRouter);
+
 app.use('/api/auth', authRouter);
+app.use('/api/chats', chatRouter);
+app.use('/api/users', usersRouter);
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.json({ status: 'OK' });
 });
 
-app.use((req, res) => {
+app.get('/*splat', (req, res) => {
   res.sendFile(path.join(__dirname, '../../hexlet-frontend/index.html'));
 });
 

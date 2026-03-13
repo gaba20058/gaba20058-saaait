@@ -1,0 +1,170 @@
+import express from 'express';
+import { prisma } from '../db';
+import { authenticateToken } from '../middleware/midd';
+
+const router = express.Router();
+
+router.get('/', authenticateToken, async (req, res) => {
+  try {
+    const chats = await prisma.chat.findMany({
+      where: {
+        participants: {
+          some: {
+            userId: req.user!.id
+          }
+        }
+      },
+      include: {
+        participants: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true
+              }
+            }
+          }
+        },
+        messages: {
+          orderBy: {
+            createdAt: 'desc'
+          },
+          take: 1
+        }
+      }
+    });
+
+    res.json(chats);
+  } catch (error) {
+    console.error('Error fetching chats:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/', authenticateToken, async (req, res) => {
+  try {
+    const { name, participants } = req.body;
+
+    if (!name || !participants || !Array.isArray(participants) || participants.length === 0) {
+      return res.status(400).json({ error: 'Chat name and participants are required' });
+    }
+
+    const allParticipants = [...new Set([...participants.map(Number), req.user!.id])];
+
+    const chat = await prisma.chat.create({
+      data: {
+        name,
+        participants: {
+          create: allParticipants.map(userId => ({
+            userId
+          }))
+        }
+      },
+      include: {
+        participants: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    res.status(201).json(chat);
+  } catch (error) {
+    console.error('Error creating chat:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/:chatId/messages', authenticateToken, async (req, res) => {
+  try {
+    const chatId = parseInt(req.params.chatId as string);  
+
+    const participant = await prisma.chatParticipant.findUnique({
+      where: {
+        chatId_userId: {
+          chatId,
+          userId: req.user!.id
+        }
+      }
+    });
+
+    if (!participant) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const messages = await prisma.message.findMany({
+      where: {
+        chatId
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            username: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'asc'
+      }
+    });
+
+    res.json(messages);
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/:chatId/messages', authenticateToken, async (req, res) => {
+  try {
+    const chatId = parseInt(req.params.chatId as string);
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ error: 'Message content is required' });
+    }
+
+    const participant = await prisma.chatParticipant.findUnique({
+      where: {
+        chatId_userId: {
+          chatId,
+          userId: req.user!.id
+        }
+      }
+    });
+
+    if (!participant) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const message = await prisma.message.create({
+      data: {
+        content,
+        chatId,
+        senderId: req.user!.id
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            username: true
+          }
+        }
+      }
+    });
+
+    res.status(201).json(message);
+  } catch (error) {
+    console.error('Error sending message:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+export default router;  

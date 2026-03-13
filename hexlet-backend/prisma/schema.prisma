@@ -14,6 +14,8 @@ model User {
   password  String
   createdAt DateTime @default(now())
   posts     Post[]
+  chats     ChatParticipant[]
+  messages  Message[]
 }
 
 model Post {
@@ -22,4 +24,34 @@ model Post {
   content   String?
   authorId  Int
   author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Chat {
+  id           Int               @id @default(autoincrement())
+  name         String
+  createdAt    DateTime          @default(now())
+  participants ChatParticipant[]
+  messages     Message[]
+}
+
+model ChatParticipant {
+  id        Int      @id @default(autoincrement())
+  chatId    Int
+  userId    Int
+  joinedAt  DateTime @default(now())
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([chatId, userId])
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  chatId    Int
+  senderId  Int
+  createdAt DateTime @default(now())
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  sender    User     @relation(fields: [senderId], references: [id])
 }
