@@ -4,6 +4,7 @@ import { authenticateToken } from '../middleware/midd';
 
 const router = express.Router();
 
+// 1. ПОЛУЧЕНИЕ СПИСКА ЧАТОВ
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const chats = await prisma.chat.findMany({
@@ -34,13 +35,20 @@ router.get('/', authenticateToken, async (req, res) => {
       }
     });
 
-    res.json(chats);
+    // Форматируем ответ: берем первое сообщение из массива messages и кладем в lastMessage
+    const formattedChats = chats.map(chat => ({
+      ...chat,
+      lastMessage: chat.messages[0] || null
+    }));
+
+    res.json(formattedChats);
   } catch (error) {
     console.error('Error fetching chats:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
+// 2. СОЗДАНИЕ ЧАТА
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const { name, participants } = req.body;
@@ -81,9 +89,50 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
+// 3. УДАЛЕНИЕ ЧАТА (Исправлена ошибка типизации)
+router.delete('/:chatId', authenticateToken, async (req, res) => {
+  try {
+    // String() гарантирует, что parseInt получит строку и ошибка TS уйдет
+    const chatId = parseInt(String(req.params.chatId));
+
+    if (isNaN(chatId)) {
+        return res.status(400).json({ error: 'Invalid chat ID' });
+    }
+
+    const chat = await prisma.chat.findUnique({
+      where: { id: chatId },
+      include: { participants: true }
+    });
+
+    if (!chat) {
+      return res.status(404).json({ error: 'Chat not found' });
+    }
+
+    const isParticipant = chat.participants.some(p => p.userId === req.user!.id);
+    if (!isParticipant) {
+      return res.status(403).json({ error: 'You are not a participant of this chat' });
+    }
+
+    // Каскадное удаление вручную
+    await prisma.message.deleteMany({ where: { chatId } });
+    await prisma.chatParticipant.deleteMany({ where: { chatId } });
+    await prisma.chat.delete({ where: { id: chatId } });
+
+    res.json({ message: 'Chat deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting chat:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// 4. ПОЛУЧЕНИЕ СООБЩЕНИЙ ЧАТА (Исправлена ошибка типизации)
 router.get('/:chatId/messages', authenticateToken, async (req, res) => {
   try {
-    const chatId = parseInt(req.params.chatId as string);  
+    const chatId = parseInt(String(req.params.chatId));
+
+    if (isNaN(chatId)) {
+        return res.status(400).json({ error: 'Invalid chat ID' });
+    }
 
     const participant = await prisma.chatParticipant.findUnique({
       where: {
@@ -99,9 +148,7 @@ router.get('/:chatId/messages', authenticateToken, async (req, res) => {
     }
 
     const messages = await prisma.message.findMany({
-      where: {
-        chatId
-      },
+      where: { chatId },
       include: {
         sender: {
           select: {
@@ -110,9 +157,7 @@ router.get('/:chatId/messages', authenticateToken, async (req, res) => {
           }
         }
       },
-      orderBy: {
-        createdAt: 'asc'
-      }
+      orderBy: { createdAt: 'asc' }
     });
 
     res.json(messages);
@@ -122,13 +167,14 @@ router.get('/:chatId/messages', authenticateToken, async (req, res) => {
   }
 });
 
+// 5. ОТПРАВКА СООБЩЕНИЯ (Исправлена ошибка типизации)
 router.post('/:chatId/messages', authenticateToken, async (req, res) => {
   try {
-    const chatId = parseInt(req.params.chatId as string);
+    const chatId = parseInt(String(req.params.chatId));
     const { content } = req.body;
 
-    if (!content) {
-      return res.status(400).json({ error: 'Message content is required' });
+    if (isNaN(chatId) || !content) {
+      return res.status(400).json({ error: 'Invalid data' });
     }
 
     const participant = await prisma.chatParticipant.findUnique({
@@ -167,4 +213,4 @@ router.post('/:chatId/messages', authenticateToken, async (req, res) => {
   }
 });
 
-export default router;  
+export default router;
