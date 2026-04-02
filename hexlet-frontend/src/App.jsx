@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage/HomePage';
 import LoginPage from './pages/LoginPage/LoginPage';
 import RegPage from './pages/RegPage/RegPage';
 import ChatPage from './pages/ChatPage/ChatPage';
+import PostPage from './pages/PostPage/PostPage';
 import './index.css';
 
 function App() {
@@ -52,7 +53,11 @@ function App() {
           <Route path="/register" element={
             <RegPage showNotification={showNotification} />
           } />
-          
+
+          <Route path="/posts" element={
+            <PostPage showNotification={showNotification} />
+          } />
+
           <Route path="/chat" element={
             <ChatPage user={user} showNotification={showNotification} />
           } />

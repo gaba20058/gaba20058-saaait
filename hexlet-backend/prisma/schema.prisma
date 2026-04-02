@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://postgres:123@localhost:5432/postgres?schema=public"
 }
 
 model User {
@@ -16,6 +16,8 @@ model User {
   posts     Post[]
   chats     ChatParticipant[]
   messages  Message[]
+  likes     Like[]
+  comments  Comment[]
 }
 
 model Post {
@@ -24,6 +26,29 @@ model Post {
   content   String?
   authorId  Int
   author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  likes     Like[]
+  comments  Comment[]
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  postId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  authorId  Int
+  postId    Int
+  author    User     @relation(fields: [authorId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
   createdAt DateTime @default(now())
 }
 

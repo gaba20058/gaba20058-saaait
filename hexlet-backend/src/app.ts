@@ -4,6 +4,7 @@ import path from 'path';
 import authRouter from './api/auth';
 import chatRouter from './api/chat';
 import usersRouter from './api/users';
+import postsRouter from './api/posts';
 
 const app = express();
 
@@ -15,10 +16,12 @@ app.use(express.static(path.join(__dirname, '../../hexlet-frontend')));
 console.log('authRouter:', typeof authRouter);
 console.log('chatRouter:', typeof chatRouter);
 console.log('usersRouter:', typeof usersRouter);
+console.log('postsRouter:', typeof postsRouter);
 
 app.use('/api/auth', authRouter);
 app.use('/api/chats', chatRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/posts', postsRouter);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'OK' });

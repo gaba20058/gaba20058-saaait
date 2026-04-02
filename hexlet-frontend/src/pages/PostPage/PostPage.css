@@ -13,32 +13,133 @@
 
 .posts-container {
     width: 100%;
-    max-width: 800px;
+    max-width: 700px;
     background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    padding: 25px;
+    margin-bottom: 50px;
+}
+
+.publish-box {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f2f5;
+}
+
+.publish-box textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 15px;
+    border: 1px solid #e1e4e8;
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    padding: 2rem;
-    margin: 20px auto;
+    resize: none;
+    font-size: 16px;
+    outline: none;
 }
 
-.posts-header {
+.publish-box textarea:focus {
+    border-color: #764ba2;
+}
+
+.publish-box button {
+    margin-top: 12px;
+    float: right;
+    background: #764ba2;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.post-item {
+    background: #fdfdfd;
+    border: 1px solid #edf2f7;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.post-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid #edf2f7;
+    margin-bottom: 15px;
 }
 
-.posts-header h2 {
+.avatar-stub {
+    width: 45px;
+    height: 45px;
+    background: #dae1e8;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.author-name {
+    font-weight: 700;
+    color: #2c2d2e;
+}
+
+.post-date {
+    font-size: 12px;
+    color: #818c99;
+    margin-left: 10px;
+}
+
+.post-content {
     color: #333;
-    font-size: 1.5rem;
+    line-height: 1.6;
+    font-size: 15px;
+    margin-bottom: 15px;
 }
 
-.posts-list {
-    min-height: 200px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #666;
+.post-actions {
+    padding-top: 10px;
+    border-top: 1px solid #f0f2f5;
+}
+
+.like-btn {
+    background: #f0f2f5;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 16px;
+    color: #555;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.comments-section {
+    margin-top: 15px;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.comment-item {
+    font-size: 13px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.comment-author {
+    font-weight: 700;
+    color: #2c2d2e;
+}
+
+.comment-input-wrapper input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 13px;
+    outline: none;
+    margin-top: 10px;
+}
+
+.empty-msg {
+    text-align: center;
+    color: #888;
+    padding: 40px;
 }
